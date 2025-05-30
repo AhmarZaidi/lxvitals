@@ -2,13 +2,12 @@ import psutil
 import os
 import shutil
 import sensors
-from dotenv import load_dotenv
-
-load_dotenv()
+from app.core.config import settings
+from app.utils.conversion import convert_size
 
 class SystemMonitor:
     def __init__(self):
-        self.drive_path = os.getenv("DRIVE_PATH", "/mnt")
+        self.drive_path = settings.DRIVE_PATH
 
     def get_cpu_usage(self):
         return round(psutil.cpu_percent(interval=1), 2)
@@ -20,16 +19,6 @@ class SystemMonitor:
             'total_gb': round(mem.total / (1024 ** 3), 2),
             'percent': mem.percent
         }
-
-    def convert_size(self, size_bytes):
-        if size_bytes >= 1 << 40:
-            return f"{round(size_bytes / (1 << 40), 2)} TB"
-        elif size_bytes >= 1 << 30:
-            return f"{round(size_bytes / (1 << 30), 2)} GB"
-        elif size_bytes >= 1 << 20:
-            return f"{round(size_bytes / (1 << 20), 2)} MB"
-        else:
-            return f"{round(size_bytes / (1 << 10), 2)} KB"
 
     def get_drive_info(self):
         drives = []
@@ -43,9 +32,9 @@ class SystemMonitor:
                 drives.append({
                     'name': os.path.basename(path),
                     'path': path,
-                    'total': self.convert_size(total),
-                    'used': self.convert_size(used),
-                    'free': self.convert_size(free),
+                    'total': convert_size(total),
+                    'used': convert_size(used),
+                    'free': convert_size(free),
                     'percent': round(used / total * 100, 2)
                 })
         return drives

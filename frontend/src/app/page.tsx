@@ -36,7 +36,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/status`;
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/system/status`;
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`Server responded with ${res.status}`);
