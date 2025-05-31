@@ -1,41 +1,33 @@
 import { useState, useEffect } from 'react';
+import { useAppContext } from '@/app/context/AppContext';
 import DashboardCard from '@/app/components/DashboardCard';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import { Speed as SpeedType } from '@/app/types';
 import DataRow from '@/app/components/DataRow';
-import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 import { checkLatency } from '@/app/utils';
 
-interface SpeedProps {
-    collapsedSections: { speed: boolean };
-    toggleCollapse: (section: 'speed') => void;
-    setCardOrder: (newOrder: string[]) => void;
-}
+export default function Speed() {
+    const {
+        dataState,
+        fetchData,
+        setCardOrder,
+        collapsedSections,
+        toggleCollapse,
+    } = useAppContext();
 
-export default function Speed({ collapsedSections, toggleCollapse, setCardOrder }: SpeedProps) {
-    const [data, setData] = useLocalStorage<SpeedType | null>('speedResults', null);
-    const [loading, setLoading] = useState(!data);
-    const [error, setError] = useState<string | null>(null);
+    const { data, loading, error } = dataState.speed;
 
     const [latency, setLatency] = useState<number | null>(null);
     const [pingLoading, setPingLoading] = useState(false);
 
-    const fetchSpeedData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/network/speed`;
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Error fetching speed data');
-            }
-            const responseJson = await response.json();
-            setData(responseJson);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        // Only fetch if we don't have data yet or if it's never been loaded
+        if (!data && !loading) {
+            fetchData('speed');
         }
+    }, [data, loading, fetchData]);
+
+    const handleRefresh = () => {
+        fetchData('speed');
     };
 
     const handlePing = async () => {
@@ -44,14 +36,6 @@ export default function Speed({ collapsedSections, toggleCollapse, setCardOrder 
         setLatency(result);
         setPingLoading(false);
     };
-
-    useEffect(() => {
-        if (!data) {
-            fetchSpeedData();
-        } else {
-            setLoading(false); // Cached data exists, no need to load
-        }
-    });
 
     return (
         <>
@@ -67,7 +51,7 @@ export default function Speed({ collapsedSections, toggleCollapse, setCardOrder 
                     onToggleCollapse={() => toggleCollapse('speed')}
                     dragId="speed"
                     onDragReorder={setCardOrder}
-                    onRefresh={fetchSpeedData}
+                    onRefresh={handleRefresh}
                 >
                     {!collapsedSections.speed && data && (
                         <div className="card-content">
@@ -97,10 +81,10 @@ export default function Speed({ collapsedSections, toggleCollapse, setCardOrder 
                                     {pingLoading ? 'Pinging...' : 'Ping'}
                                 </button>
 
-                                <button 
-                                    type="button" 
-                                    className='button primary' 
-                                    onClick={fetchSpeedData} 
+                                <button
+                                    type="button"
+                                    className='button primary'
+                                    onClick={handleRefresh}
                                     disabled={loading}
                                 >
                                     {loading ? 'Testing...' : 'Test Again'}

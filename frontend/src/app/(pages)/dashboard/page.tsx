@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocalStorage } from '@/app/hooks/useLocalStorage';
+import { useAppContext } from '@/app/context/AppContext';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import CPU from '@/app/components/cpu';
@@ -9,75 +9,38 @@ import Memory from '@/app/components/memory';
 import Drives from '@/app/components/drives';
 import Battery from '@/app/components/battery';
 import Wifi from '@/app/components/wifi';
-import Speed from '@/app/components/speed'
+import Speed from '@/app/components/speed';
 import FloatingActions from '@/app/components/FloatingActions';
 
 export default function Dashboard() {
-    const [collapsedSections, setCollapsedSections] = useLocalStorage('collapsedSections', {
-        cpu: false,
-        gpu: false,
-        memory: false,
-        drives: false,
-        battery: false,
-        wifi: false,
-        speed: false,
-    });
+    const { cardOrder } = useAppContext();
 
-    // Card order state
-    const [cardOrder, setCardOrder] = useLocalStorage('cardOrder', ['cpu', 'gpu', 'memory', 'speed', 'battery', 'network', 'wifi', 'drives']);
-
-    const toggleCollapse = (section: string) => {
-        setCollapsedSections(prev => ({
-            ...prev,
-            [section]: !prev[section]
-        }));
+    const componentMap: Record<string, JSX.Element> = {
+        cpu: <CPU key="cpu" />,
+        gpu: <GPU key="gpu" />,
+        memory: <Memory key="memory" />,
+        drives: <Drives key="drives" />,
+        battery: <Battery key="battery" />,
+        wifi: <Wifi key="wifi" />,
+        speed: <Speed key="speed" />
     };
 
     return (
         <div className="container">
-            <Header title='Linux Vitals' showDarkModeToggle={true} showHomeButton={false}/>
-            <div className="grid">
-                {cardOrder.map(section => {
-                    switch (section) {
-                        case 'cpu':
-                            return (
-                                <CPU key="cpu" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
-                        case 'gpu':
-                            return (
-                                <GPU key="gpu" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
+            <Header title="Linux Vitals" showDarkModeToggle={true} showHomeButton={false} />
 
-                        case 'memory':
-                            return (
-                                <Memory key="memory" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
+            {cardOrder ? (
+                <div className="grid">
+                    {cardOrder.map(section =>
+                        componentMap[section] ? componentMap[section] : null
+                    )}
+                </div>
+            ) : (
+                <div className="loading-container">
+                    <p>Loading dashboard...</p>
+                </div>
+            )}
 
-                        case 'drives':
-                            return (
-                                <Drives key="drives" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
-
-                        case 'battery':
-                            return (
-                                <Battery key="battery" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
-                        
-                        case 'wifi':
-                            return (
-                                <Wifi key="wifi" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
-                        
-                        case 'speed':
-                            return (
-                                <Speed key="speed" collapsedSections={collapsedSections} toggleCollapse={toggleCollapse} setCardOrder={setCardOrder} />
-                            );
-
-                        default:
-                            return null;
-                    }
-                })}
-            </div>
             <Footer />
             <FloatingActions />
         </div>

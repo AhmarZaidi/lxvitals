@@ -26,7 +26,7 @@ export default function About() {
             <Card title="Linux Vitals">
                 <div className="card-content">
                 <p>
-                    Samba Vitals is a system monitoring tool that provides real-time hardware statistics
+                    Linux Vitals is a system monitoring tool that provides real-time hardware statistics
                     for your server or computer. It displays CPU/GPU usage, temperatures, fan speeds, memory 
                     usage, external drive storage details, battery stats and network information.
                 </p>

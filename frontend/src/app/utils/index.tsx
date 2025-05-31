@@ -47,3 +47,33 @@ export async function checkLatency(): Promise<number | null> {
         return null;
     }
 }
+
+export function formatTimeLeft(value: number, unit: string): { value: number; unit: string } {
+    let totalSeconds: number;
+
+    switch (unit.toLowerCase()) {
+        case 'seconds':
+            totalSeconds = value;
+            break;
+        case 'minutes':
+            totalSeconds = value * 60;
+            break;
+        case 'hours':
+            totalSeconds = value * 3600;
+            break;
+        default:
+            return { value, unit };
+    }
+
+    if (totalSeconds >= 3600) {
+        return {
+            value: parseFloat((totalSeconds / 3600).toFixed(2)),
+            unit: 'hours',
+        };
+    } else {
+        return {
+            value: Math.round(totalSeconds / 60),
+            unit: 'minutes',
+        };
+    }
+}

@@ -351,11 +351,13 @@ button, .button {
   right: 8.8%;
   
   button, a {
+    margin-left: 0.5rem;
     border-radius: 9999px;
     padding: 0.5rem 1rem;
     display: inline-flex;
     align-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 26px;
   }
 }
 

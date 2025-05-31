@@ -7,7 +7,7 @@ export default function Footer() {
         <p>
           <Link href="/about">About</Link>
           {' • '}
-          <span>© {new Date().getFullYear()} Samba Vitals</span>
+          <span>© {new Date().getFullYear()} Linux Vitals</span>
         </p>
       </div>
     </footer>

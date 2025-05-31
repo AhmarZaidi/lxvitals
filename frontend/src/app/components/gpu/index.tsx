@@ -1,44 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useAppContext } from '@/app/context/AppContext';
 import DashboardCard from '@/app/components/DashboardCard';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import { GPU as GPUType } from '@/app/types';
 import Temperature from '@/app/components/Temperature';
 import FanSpeed from '@/app/components/FanSpeed';
 import PercentageData from '@/app/components/PercentageData';
 import DataRow from '@/app/components/DataRow';
 
-interface GPUProps {
-    collapsedSections: { gpu: boolean };
-    toggleCollapse: (section: 'gpu') => void;
-    setCardOrder: (newOrder: string[]) => void;
-}
+export default function GPU() {
+    const {
+        dataState,
+        fetchData,
+        setCardOrder,
+        collapsedSections,
+        toggleCollapse,
+    } = useAppContext();
 
-export default function GPU({ collapsedSections, toggleCollapse, setCardOrder }: GPUProps) {
-    const [data, setData] = useState<GPUType | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchGpuData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/system/gpu`;
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Error fetching GPU data');
-            }
-            const responseJson = await response.json();
-            setData(responseJson);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data, loading, error } = dataState.gpu;
 
     useEffect(() => {
-        fetchGpuData();
-    }, []);
+        // Only fetch if we don't have data yet or if it's never been loaded
+        if (!data && !loading) {
+            fetchData('gpu');
+        }
+    }, [data, loading, fetchData]);
+
+    const handleRefresh = () => {
+        fetchData('gpu');
+    };
 
     return (
         <>
@@ -54,7 +43,7 @@ export default function GPU({ collapsedSections, toggleCollapse, setCardOrder }:
                     onToggleCollapse={() => toggleCollapse('gpu')}
                     dragId="gpu"
                     onDragReorder={setCardOrder}
-                    onRefresh={fetchGpuData}
+                    onRefresh={handleRefresh}
                 >
                     {!collapsedSections.gpu && data && (
                         <div className="card-content">
@@ -62,7 +51,7 @@ export default function GPU({ collapsedSections, toggleCollapse, setCardOrder }:
                             <DataRow title="Using Nvidia" data={data.using_nvidia ? 'True' : 'False'} />
                             <Temperature temperature={data.temperature} temperature_unit={data.temperature_unit} />
                             <FanSpeed fan_speed={data.fan_speed} fan_speed_unit={data.fan_speed_unit} />
-                            <PercentageData title="Usage" usage_percent={data.usage_percent} reverse={false}/>
+                            <PercentageData title="Usage" usage_percent={data.usage_percent} reverse={false} />
                         </div>
                     )}
                 </DashboardCard>

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import './globals.scss';
 import { ReactNode } from 'react';
 import ThemeProvider from '@/app/providers/ThemeProvider';
+import { AppProvider } from '@/app/context/AppContext';
 
 export const metadata: Metadata = {
     title: 'Samba Vitals - Server Dashboard',
@@ -12,7 +13,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang="en" suppressHydrationWarning>
             <body>
-                <ThemeProvider>{children}</ThemeProvider>
+                <ThemeProvider>
+                    <AppProvider>{children}</AppProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
