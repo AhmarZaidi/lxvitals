@@ -18,7 +18,7 @@ A system monitoring API for Linux machines that provides information about CPU, 
 
 ## Project Structure
 
-```
+```plaintext
 lxvitals/backend/
 │
 ├── app/                    # Main application package
@@ -28,6 +28,7 @@ lxvitals/backend/
 │   ├── core/               # Core application code
 │   │   └── config.py       # Configuration settings
 │   ├── services/           # Business logic services
+│   │   ├── battery_monitor.py  # Battery monitoring service
 │   │   ├── system_monitor.py  # System monitoring service
 │   │   └── network_monitor.py # Network monitoring service
 │   └── utils/              # Utility functions
@@ -49,12 +50,15 @@ lxvitals/backend/
 
 1. Clone the repository
 2. Install dependencies:
-   ```
+
+   ```bash
    pip install -r requirements.txt
    ```
+
 3. Create a `.env` file based on `.env.example`
 4. Run the application:
-   ```
+
+   ```bash
    python main.py
    ```
 
@@ -74,10 +78,19 @@ lxvitals/backend/
 - `GET /api/network/wifi` - Get network wifi information
 - `GET /api/network/speed` - Get network speed test results
 
+### Battery Monitoring Endpoints
+
+- `GET /api/battery/` - Get battery statistics
+- `GET /api/battery/percentage` - Get battery percentage
+- `GET /api/battery/mode` - Get battery mode (charging/discharging)
+- `GET /api/battery/rate` - Get battery charge/discharge rate
+- `GET /api/battery/time_left` - Get battery time remaining in seconds
+
 ## Development
 
 To run tests:
-```
+
+```bash
 pytest
 ```
 
@@ -86,3 +99,4 @@ pytest
 - `DRIVE_PATH`: Path to mounted drives (default: "/mnt")
 - `CORS_ORIGINS`: Comma-separated list of allowed origins for CORS (default: "*")
 - `PLATFORM`: Platform type (default: "linux")
+- 
