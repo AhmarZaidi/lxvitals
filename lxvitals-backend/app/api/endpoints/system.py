@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from app.services.system_monitor import SystemMonitor
-from app.services.network_monitor import NetworkMonitor
 
 router = APIRouter()
 
@@ -8,13 +7,8 @@ router = APIRouter()
 async def get_system_status():
     """Get complete system status including CPU, GPU, memory and drives"""
     system_monitor = SystemMonitor()
-    network_monitor = NetworkMonitor()
     
     status = system_monitor.get_status()
-    network_status = network_monitor.get_status()
-    
-    # Merge the results
-    status["network"] = network_status
     
     return status
 
@@ -41,9 +35,3 @@ async def get_drive_stats():
     """Get drive statistics"""
     system_monitor = SystemMonitor()
     return system_monitor.get_drive_info()
-
-@router.get("/network")
-async def get_network_stats():
-    """Get network statistics"""
-    network_monitor = NetworkMonitor()
-    return network_monitor.get_status()

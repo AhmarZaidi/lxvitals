@@ -1,5 +1,11 @@
 import psutil
 import time
+import subprocess
+import platform
+import re
+import speedtest
+
+from app.utils.utils import get_connected_ap_index, get_current_ap_index, format_speed
 
 class NetworkMonitor:
     def __init__(self):
@@ -7,69 +13,132 @@ class NetworkMonitor:
         self.last_time = None
 
     def get_network_speed(self):
-        """Calculate current network speed in bytes/sec"""
-        if self.last_stats is None:
-            self.last_stats = psutil.net_io_counters()
-            self.last_time = time.time()
-            # Return zeros for first call
+        try:
+            start_time = time.time()
+
+            st = speedtest.Speedtest(timeout=1)
+            st.get_best_server()
+            download = st.download()
+            upload = st.upload()
+
+            end_time = time.time()
+            test_time = end_time - start_time
+            test_time = f"{test_time:.2f} seconds"
+
             return {
-                'bytes_sent': 0,
-                'bytes_recv': 0,
-                'bytes_sent_per_sec': 0,
-                'bytes_recv_per_sec': 0
+                'upload_speed': format_speed(upload),
+                'download_speed': format_speed(download),
+                'test_time': test_time,
             }
-        
-        current_stats = psutil.net_io_counters()
-        current_time = time.time()
-        
-        time_elapsed = current_time - self.last_time
-        
-        bytes_sent = current_stats.bytes_sent
-        bytes_recv = current_stats.bytes_recv
-        
-        bytes_sent_per_sec = round((bytes_sent - self.last_stats.bytes_sent) / time_elapsed, 2)
-        bytes_recv_per_sec = round((bytes_recv - self.last_stats.bytes_recv) / time_elapsed, 2)
-        
-        # Update last values
-        self.last_stats = current_stats
-        self.last_time = current_time
-        
-        return {
-            'bytes_sent': bytes_sent,
-            'bytes_recv': bytes_recv,
-            'bytes_sent_per_sec': bytes_sent_per_sec,
-            'bytes_recv_per_sec': bytes_recv_per_sec
-        }
+        except Exception as e:
+            print(f"Error during speed test: {e}")
+
+            end_time = time.time()
+            test_time = end_time - start_time
+            test_time = f"{test_time:.2f} seconds"
+            return {
+                'error': str(e),
+                'test_time': test_time,
+            }
+
+    def get_wifi_info(self):
+        if platform.system() != "Linux":
+            return {}
+
+        try:
+            # Step 1: Identify connected Wi-Fi device
+            dev_output = subprocess.check_output(
+                ["nmcli", "-t", "-f", "device,type,state", "device"],
+                stderr=subprocess.DEVNULL
+            ).decode()
+
+            wifi_device = None
+            for line in dev_output.strip().splitlines():
+                parts = line.strip().split(":")
+                if parts[1] == "wifi" and parts[2] == "connected":
+                    wifi_device = parts[0]
+                    break
+
+            if not wifi_device:
+                return {}
+    
+            # Step 2: Get detailed info
+            fields = [
+                "GENERAL.CONNECTION",
+                "GENERAL.DEVICE",
+                "GENERAL.TYPE",
+                "GENERAL.STATE",
+                "GENERAL.VENDOR",
+                "GENERAL.PRODUCT",
+                "GENERAL.DRIVER",
+                "GENERAL.HWADDR",
+                "AP",
+                "IP4",
+                "IP6",
+            ]
+
+            out = subprocess.check_output(
+                ["nmcli", "-t", "-f", ",".join(fields), "device", "show", wifi_device],
+                stderr=subprocess.DEVNULL
+            ).decode()
+
+            connected_index = get_connected_ap_index(out)
+
+            info = {}
+            for line in out.strip().splitlines():
+                key, _, value = line.partition(":")
+                key = key.strip()
+                value = value.strip()
+
+                if "GENERAL.CONNECTION" in key:
+                    info["ssid"] = value
+                elif "GENERAL.DEVICE" in key:
+                    info["device"] = value
+                elif "GENERAL.TYPE" in key:
+                    info["type"] = value
+                elif "GENERAL.STATE" in key:
+                    info["state"] = value
+                elif "GENERAL.VENDOR" in key:
+                    info["vendor"] = value
+                elif "GENERAL.PRODUCT" in key:
+                    info["product"] = value
+                elif "GENERAL.DRIVER" in key:
+                    info["driver"] = value
+                elif "GENERAL.HWADDR" in key:
+                    info["mac_address"] = value
+                elif f"IP4.ADDRESS[1]" in key:
+                    info["ipv4"] = value
+                elif f"IP6.ADDRESS[1]" in key:
+                    info["ipv6"] = value
+                elif f"IP4.DNS[1]" in key:
+                    info["dns"] = value
+
+                current_index = get_current_ap_index(key)
+
+                if connected_index is not None and current_index is not None and current_index != connected_index:
+                    continue
+                else:
+                    if f"AP[{connected_index}].MODE" in key:
+                        info["mode"] = value
+                    elif f"AP[{connected_index}].RATE" in key:
+                        info["rate"] = value
+                    elif f"AP[{connected_index}].SIGNAL" in key:
+                        info["signal"] = value
+                    elif f"AP[{connected_index}].BARS" in key:
+                        info["bars"] = value
+                    elif f"AP[{connected_index}].SECURITY" in key:
+                        info["security"] = value
+    
+            return info
+
+        except Exception:
+            return {}
 
     def get_status(self):
-        """Get current network status"""
-        stats = self.get_network_speed()
-        
-        # Convert bytes/sec to more readable units
-        up_speed = stats['bytes_sent_per_sec']
-        down_speed = stats['bytes_recv_per_sec']
-        
-        if up_speed < 1024:
-            upload_speed = f"{up_speed:.2f} B/s"
-        elif up_speed < 1024 * 1024:
-            upload_speed = f"{up_speed/1024:.2f} KB/s"
-        else:
-            upload_speed = f"{up_speed/(1024*1024):.2f} MB/s"
-            
-        if down_speed < 1024:
-            download_speed = f"{down_speed:.2f} B/s"
-        elif down_speed < 1024 * 1024:
-            download_speed = f"{down_speed/1024:.2f} KB/s"
-        else:
-            download_speed = f"{down_speed/(1024*1024):.2f} MB/s"
-        
+        speed = self.get_network_speed()
+        wifi = self.get_wifi_info()
+
         return {
-            'upload_speed': upload_speed,
-            'download_speed': download_speed,
-            'total_sent': stats['bytes_sent'],
-            'total_received': stats['bytes_recv'],
-            'raw': {
-                'upload_bytes_per_sec': stats['bytes_sent_per_sec'],
-                'download_bytes_per_sec': stats['bytes_recv_per_sec']
-            }
+            "speed": speed,
+            "wifi": wifi
         }

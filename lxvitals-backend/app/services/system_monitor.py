@@ -3,7 +3,7 @@ import os
 import shutil
 import sensors
 from app.core.config import settings
-from app.utils.conversion import convert_size
+from app.utils.utils import convert_size
 
 class SystemMonitor:
     def __init__(self):
