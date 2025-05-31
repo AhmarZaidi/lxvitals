@@ -57,12 +57,9 @@ class SystemMonitor:
         temperature = None
         try:
             for chip in sensors.iter_detected_chips():
-                print(f"Detected chip: {chip}")
                 label = str(chip)
                 for feature in chip:
                     name = feature.label.lower()
-                    print(f"Feature: {feature}, Label: {label}, Name: {name}")
-                    print("\n\n")
                     if "edge" in name and "amdgpu" in label:
                         temperature = round(feature.get_value(), 1)
             sensors.cleanup()
