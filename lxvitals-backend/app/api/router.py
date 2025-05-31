@@ -5,6 +5,12 @@ from app.api.endpoints import battery
 
 router = APIRouter()
 
+# add a ping router
+@router.get("/ping")
+async def ping():
+    """Ping endpoint to check if the server is running"""
+    return {"message": "pong"}
+
 # Include all endpoint routers
 router.include_router(system.router, prefix="/api/system", tags=["System"])
 router.include_router(network.router, prefix="/api/network", tags=["Network"])

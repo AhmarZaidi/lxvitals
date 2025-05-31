@@ -161,7 +161,10 @@ class SystemMonitor:
                     'percent': percent
                 })
 
-            return drives   
+            return {
+                'drives': drives,
+                'total_drives': len(drives)
+            } 
         except Exception as e:
             return {'error': str(e)}
 

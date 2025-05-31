@@ -5,24 +5,3 @@
 .hidden {
   display: none;
 }
-
-.collapse-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    
-    body.dark & {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-}
