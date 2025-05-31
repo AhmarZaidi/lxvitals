@@ -72,7 +72,8 @@ class SystemMonitor:
                 'temperature': temperature,
                 'temperature_unit': 'celsius',
                 'usage_percent': None,
-                'fan_speed': None
+                'fan_speed': None,
+                'fan_speed_unit': None,
             }
         except Exception as e:
             return {'error': str(e)}  
