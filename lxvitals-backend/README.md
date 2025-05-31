@@ -31,7 +31,7 @@ lxvitals/backend/
 │   │   ├── system_monitor.py  # System monitoring service
 │   │   └── network_monitor.py # Network monitoring service
 │   └── utils/              # Utility functions
-│       └── conversion.py   # Size conversion utilities
+│       └── utils.py        
 │
 ├── tests/                  # Test package
 │   ├── conftest.py         # Test configuration and fixtures
@@ -60,12 +60,19 @@ lxvitals/backend/
 
 ## API Endpoints
 
-- `GET /api/system/status` - Get complete system status
+### System Monitoring Endpoints
+
+- `GET /api/system/` - Get complete system status
 - `GET /api/system/cpu` - Get CPU statistics
 - `GET /api/system/memory` - Get memory usage
 - `GET /api/system/gpu` - Get GPU statistics
 - `GET /api/system/drives` - Get drive information
-- `GET /api/system/network` - Get network statistics
+
+### Network Monitoring Endpoints
+
+- `GET /api/network/` - Get network statistics
+- `GET /api/network/wifi` - Get network wifi information
+- `GET /api/network/speed` - Get network speed test results
 
 ## Development
 
@@ -78,3 +85,4 @@ pytest
 
 - `DRIVE_PATH`: Path to mounted drives (default: "/mnt")
 - `CORS_ORIGINS`: Comma-separated list of allowed origins for CORS (default: "*")
+- `PLATFORM`: Platform type (default: "linux")

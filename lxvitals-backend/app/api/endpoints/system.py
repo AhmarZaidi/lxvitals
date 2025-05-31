@@ -3,7 +3,7 @@ from app.services.system_monitor import SystemMonitor
 
 router = APIRouter()
 
-@router.get("/status")
+@router.get("/")
 async def get_system_status():
     """Get complete system status including CPU, GPU, memory and drives"""
     system_monitor = SystemMonitor()

@@ -12,7 +12,6 @@ def test_get_system_status(client):
     assert "gpu" in data
     assert "memory" in data
     assert "drives" in data
-    assert "network" in data
 
 def test_get_cpu_stats(client):
     """Test the CPU stats endpoint"""

@@ -23,18 +23,27 @@ def get_current_ap_index(key: str):
 def convert_size(size_bytes):
     """Convert bytes to human-readable string"""
     if size_bytes >= 1 << 40:
-        return f"{round(size_bytes / (1 << 40), 2)} TB"
+        return round(size_bytes / (1 << 40), 2)
     elif size_bytes >= 1 << 30:
-        return f"{round(size_bytes / (1 << 30), 2)} GB"
+        return round(size_bytes / (1 << 30), 2)
     elif size_bytes >= 1 << 20:
-        return f"{round(size_bytes / (1 << 20), 2)} MB"
+        return round(size_bytes / (1 << 20), 2)
     else:
-        return f"{round(size_bytes / (1 << 10), 2)} KB"
+        return round(size_bytes / (1 << 10), 2)
     
-def format_speed(bps):
-    # Convert bits per second to Mbps
-    if bps <= 0:
-        return "0 Mbps"
-    mbps = bps / (1024 * 1024)
-    return f"{mbps:.2f} Mbps"
+def calculate_size_unit(size_bytes):
+    """Return the unit for the given size in bytes"""
+    if size_bytes >= 1 << 40:
+        return "TB"
+    elif size_bytes >= 1 << 30:
+        return "GB"
+    elif size_bytes >= 1 << 20:
+        return "MB"
+    else:
+        return "KB"
 
+
+def convert_speed(bps):
+    # Convert bits per second to Mbps
+    mbps = bps / (1024 * 1024)
+    return round(mbps, 2)

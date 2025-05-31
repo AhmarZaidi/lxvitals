@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
+import platform
 from dotenv import load_dotenv
 
 from app.api.router import router
@@ -29,4 +30,8 @@ app.add_middleware(
 app.include_router(router)
 
 if __name__ == "__main__":
+    if platform.system() != settings.PLATFORM:
+        print(f"This application is designed to run on {settings.PLATFORM} systems only.")
+        exit(1)
+
     uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)

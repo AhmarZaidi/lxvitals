@@ -3,9 +3,9 @@ from app.services.network_monitor import NetworkMonitor
 
 router = APIRouter()
 
-@router.get("/status")
+@router.get("/")
 async def get_network_stats():
-    """Get network statistics"""
+    """Get network statistics including wifi and speed"""
     network_monitor = NetworkMonitor()
     return network_monitor.get_status()
 

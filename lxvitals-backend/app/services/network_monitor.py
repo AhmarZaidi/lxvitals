@@ -5,7 +5,7 @@ import platform
 import re
 import speedtest
 
-from app.utils.utils import get_connected_ap_index, get_current_ap_index, format_speed
+from app.utils.utils import get_connected_ap_index, get_current_ap_index, convert_speed
 
 class NetworkMonitor:
     def __init__(self):
@@ -21,30 +21,30 @@ class NetworkMonitor:
             download = st.download()
             upload = st.upload()
 
+            upload_speed = convert_speed(upload) if upload else None
+            download_speed = convert_speed(download) if download else None
+
             end_time = time.time()
-            test_time = end_time - start_time
-            test_time = f"{test_time:.2f} seconds"
+            test_time = round(end_time - start_time, 2)
 
             return {
-                'upload_speed': format_speed(upload),
-                'download_speed': format_speed(download),
+                'upload_speed': upload_speed,
+                'download_speed': download_speed,
+                'speed_unit': 'Mbps',
                 'test_time': test_time,
-            }
+                'test_time_unit': 'seconds',
+            }      
         except Exception as e:
-            print(f"Error during speed test: {e}")
-
             end_time = time.time()
-            test_time = end_time - start_time
-            test_time = f"{test_time:.2f} seconds"
+            test_time = round(end_time - start_time, 2)
+
             return {
                 'error': str(e),
                 'test_time': test_time,
+                'test_time_unit': 'seconds',
             }
 
     def get_wifi_info(self):
-        if platform.system() != "Linux":
-            return {}
-
         try:
             # Step 1: Identify connected Wi-Fi device
             dev_output = subprocess.check_output(
@@ -60,7 +60,7 @@ class NetworkMonitor:
                     break
 
             if not wifi_device:
-                return {}
+                return {'error': 'Wi-Fi device not recognized.'}
     
             # Step 2: Get detailed info
             fields = [
@@ -83,6 +83,8 @@ class NetworkMonitor:
             ).decode()
 
             connected_index = get_connected_ap_index(out)
+            if connected_index is None:
+                return {'error': 'No connected access point found.'}
 
             info = {}
             for line in out.strip().splitlines():
@@ -91,27 +93,27 @@ class NetworkMonitor:
                 value = value.strip()
 
                 if "GENERAL.CONNECTION" in key:
-                    info["ssid"] = value
+                    info["ssid"] = value if value else None
                 elif "GENERAL.DEVICE" in key:
-                    info["device"] = value
+                    info["device"] = value if value else None
                 elif "GENERAL.TYPE" in key:
-                    info["type"] = value
+                    info["type"] = value if value else None
                 elif "GENERAL.STATE" in key:
-                    info["state"] = value
+                    info["state"] = value if value else None
                 elif "GENERAL.VENDOR" in key:
-                    info["vendor"] = value
+                    info["vendor"] = value if value else None
                 elif "GENERAL.PRODUCT" in key:
-                    info["product"] = value
+                    info["product"] = value if value else None
                 elif "GENERAL.DRIVER" in key:
-                    info["driver"] = value
+                    info["driver"] = value if value else None
                 elif "GENERAL.HWADDR" in key:
-                    info["mac_address"] = value
+                    info["mac_address"] = value if value else None
                 elif f"IP4.ADDRESS[1]" in key:
-                    info["ipv4"] = value
+                    info["ipv4"] = value if value else None
                 elif f"IP6.ADDRESS[1]" in key:
-                    info["ipv6"] = value
+                    info["ipv6"] = value if value else None
                 elif f"IP4.DNS[1]" in key:
-                    info["dns"] = value
+                    info["dns"] = value if value else None
 
                 current_index = get_current_ap_index(key)
 
@@ -119,26 +121,28 @@ class NetworkMonitor:
                     continue
                 else:
                     if f"AP[{connected_index}].MODE" in key:
-                        info["mode"] = value
+                        info["mode"] = value if value else None
                     elif f"AP[{connected_index}].RATE" in key:
-                        info["rate"] = value
+                        info["rate"] = value if value else None
                     elif f"AP[{connected_index}].SIGNAL" in key:
-                        info["signal"] = value
+                        info["signal"] = int(value) if value else None
                     elif f"AP[{connected_index}].BARS" in key:
-                        info["bars"] = value
+                        info["bars"] = value if value else None
                     elif f"AP[{connected_index}].SECURITY" in key:
-                        info["security"] = value
+                        info["security"] = value if value else None
     
             return info
-
-        except Exception:
-            return {}
+        except Exception as e:
+            return {"error": str(e)}
 
     def get_status(self):
-        speed = self.get_network_speed()
-        wifi = self.get_wifi_info()
+        try:
+            speed = self.get_network_speed()
+            wifi = self.get_wifi_info()
 
-        return {
-            "speed": speed,
-            "wifi": wifi
-        }
+            return {
+                "speed": speed,
+                "wifi": wifi
+            }
+        except Exception as e:
+            return {"error": str(e)}

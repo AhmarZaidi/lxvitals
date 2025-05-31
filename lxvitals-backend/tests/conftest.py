@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 
+# TODO: Update tests
 @pytest.fixture
 def client():
     """Return a TestClient for testing the API"""
