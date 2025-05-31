@@ -52,6 +52,7 @@ export default function Wifi({ collapsedSections, toggleCollapse, setCardOrder }
                     onToggleCollapse={() => toggleCollapse('wifi')}
                     dragId="wifi"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchWifiData}
                 >
                     {!collapsedSections.wifi && data && (
                         <div className="card-content">

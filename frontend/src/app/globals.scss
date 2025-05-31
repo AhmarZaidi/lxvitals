@@ -38,6 +38,7 @@ body {
   background-color: $light-bg;
   color: $light-text;
   min-height: 100vh;
+  overflow-x: hidden;
   
   &.dark {
     background-color: $dark-bg;
@@ -346,11 +347,8 @@ button, .button {
 // Fixed action buttons
 .fixed-actions {
   position: fixed;
-  width: 82%;
-  bottom: 1rem;
-  display: flex;
-  right: 9%;
-  justify-content: space-between;
+  bottom: 1rem;;
+  right: 8.8%;
   
   button, a {
     border-radius: 9999px;

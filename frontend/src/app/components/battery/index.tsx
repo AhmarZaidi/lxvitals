@@ -52,6 +52,7 @@ export default function Battery({ collapsedSections, toggleCollapse, setCardOrde
                     onToggleCollapse={() => toggleCollapse('battery')}
                     dragId="battery"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchBatteryData}
                     fullWidth={true}
                 >
                     {!collapsedSections.battery && data && (

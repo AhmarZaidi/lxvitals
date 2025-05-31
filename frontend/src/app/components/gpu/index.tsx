@@ -54,6 +54,7 @@ export default function GPU({ collapsedSections, toggleCollapse, setCardOrder }:
                     onToggleCollapse={() => toggleCollapse('gpu')}
                     dragId="gpu"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchGpuData}
                 >
                     {!collapsedSections.gpu && data && (
                         <div className="card-content">

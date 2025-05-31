@@ -12,16 +12,8 @@ export default function FloatingActions({}: FloatingActionsProps) {
             href="/settings"
             className="button secondary"
           >
-            ⚙️ Settings
+            ⚙️
           </Link>
-          <button
-            type="button"
-            className="button primary"
-            // disabled={loading}
-          >
-            {/* {loading ? 'Refreshing...' : '🔄 Refresh'} */}
-            {'🔄 Refresh'}
-          </button>
     </div>
   );
 }

@@ -51,6 +51,7 @@ export default function Drives({ collapsedSections, toggleCollapse, setCardOrder
                     onToggleCollapse={() => toggleCollapse('drives')}
                     dragId="drives"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchDrivesData}
                     fullWidth={true}
                 >
                     {!collapsedSections.drives && data && (

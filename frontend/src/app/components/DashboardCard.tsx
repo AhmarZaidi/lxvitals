@@ -8,6 +8,7 @@ interface DashboardCardProps {
     onToggleCollapse: () => void;
     dragId: string;
     onDragReorder: (newOrder: string[]) => void;
+    onRefresh?: () => void; 
     fullWidth?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function DashboardCard({
     onToggleCollapse,
     dragId,
     onDragReorder,
+    onRefresh,
     fullWidth = false
 }: DashboardCardProps) {
     const [isDragging, setIsDragging] = useState(false);
@@ -50,7 +52,7 @@ export default function DashboardCard({
                 onDragReorder(newOrder);
             }
         }
-    };
+    };  
 
     return (
         <div
@@ -63,15 +65,28 @@ export default function DashboardCard({
         >
             <div className="card-header">
                 <h2>{title}</h2>
-                <button
-                    onClick={onToggleCollapse}
-                    className="collapse-toggle"
-                >
-                    {isCollapsed ?
-                        <span>▼</span> :
-                        <span>▲</span>
-                    }
-                </button>
+                <div className="header-buttons-container">
+                    {onRefresh && (
+                        <button
+                            type="button"
+                            onClick={onRefresh}
+                            className="refresh-button"
+                            title="Reload"
+                        >
+                            ⟳
+                        </button>
+                    )}
+                    <button
+                        type='button'
+                        onClick={onToggleCollapse}
+                        className="collapse-toggle"
+                    >
+                        {isCollapsed ?
+                            <span>▼</span> :
+                            <span>▲</span>
+                        }
+                    </button>
+                </div>
             </div>
             <div className={`card-body ${isCollapsed ? 'hidden' : ''}`}>
                 {children}

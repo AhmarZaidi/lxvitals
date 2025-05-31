@@ -67,6 +67,7 @@ export default function Speed({ collapsedSections, toggleCollapse, setCardOrder 
                     onToggleCollapse={() => toggleCollapse('speed')}
                     dragId="speed"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchSpeedData}
                 >
                     {!collapsedSections.speed && data && (
                         <div className="card-content">

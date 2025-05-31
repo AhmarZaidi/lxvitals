@@ -52,6 +52,7 @@ export default function Memory({ collapsedSections, toggleCollapse, setCardOrder
                     onToggleCollapse={() => toggleCollapse('memory')}
                     dragId="memory"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchMemoryData}
                 >
                     {!collapsedSections.memory && data && (
                         <div className="card-content">

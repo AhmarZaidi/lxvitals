@@ -54,6 +54,7 @@ export default function CPU({ collapsedSections, toggleCollapse, setCardOrder }:
                     onToggleCollapse={() => toggleCollapse('cpu')}
                     dragId="cpu"
                     onDragReorder={setCardOrder}
+                    onRefresh={fetchCpuData}
                 >
                     {!collapsedSections.cpu && data && (
                         <div className="card-content">
