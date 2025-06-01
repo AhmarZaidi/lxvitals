@@ -1,17 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useAppContext } from '@/app/context/AppContext';
 import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import Card from '@/app/components/Card';
+import { pingBackend, normalizeUrl, checkInterval } from '@/app/utils';
 
 export default function Settings() {
+    const { 
+        backendUrl, 
+        setBackendUrl, 
+        refreshInterval, 
+        setRefreshInterval
+    } = useAppContext();
+
     const [darkMode, setDarkMode] = useLocalStorage('darkMode', true);
-    const [refreshInterval, setRefreshInterval] = useLocalStorage('refreshInterval', 30);
-    const [backendUrl, setBackendUrl] = useState('');
+    const [tempBackendUrl, setTempBackendUrl] = useState('');
+    const [tempRefreshInterval, setTempRefreshInterval] = useState(refreshInterval);
     const [isSaved, setIsSaved] = useState(false);
+    const [isIntervalSaved, setIsIntervalSaved] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     useEffect(() => {
         if (darkMode) {
@@ -22,21 +32,62 @@ export default function Settings() {
     }, [darkMode]);
 
     useEffect(() => {
-        // Get the backend URL from .env
-        const url = process.env.NEXT_PUBLIC_BACKEND_URL;
-        setBackendUrl(url || '');
-    }, []);
+        // Initialize the temp URL from the context
+        setTempBackendUrl(backendUrl || '');
+        setTempRefreshInterval(refreshInterval);
+    }, [backendUrl, refreshInterval]);
 
-    const handleSave = () => {
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000);
-        // We would normally update the .env file here, but that's not possible in the browser
-        // This is just a mock UI
+    const handleSave = async () => {
+        if (!tempBackendUrl.trim()) {
+            setConnectionStatus('error');
+            return;
+        }
+
+        setConnectionStatus('loading');
+
+        // Normalize URL - add protocol if missing
+        const finalUrl = normalizeUrl(tempBackendUrl);
+        setTempBackendUrl(finalUrl);
+
+        // Test the connection first
+        try {
+            const isAlive = await pingBackend(tempBackendUrl);
+            if (isAlive) {
+                // Update the URL if connection is successful
+                setBackendUrl(finalUrl);
+                setConnectionStatus('success');
+                setIsSaved(true);
+                setTimeout(() => setIsSaved(false), 2000);
+            } else {
+                setConnectionStatus('error');
+            }
+        } catch (error) {
+            console.error('Error testing backend connection:', error);
+            setConnectionStatus('error');
+        }
+    };
+
+    const handleIntervalSave = () => {
+        // Ensure the interval is a valid number and within reasonable bounds
+        try {
+            const interval = checkInterval(tempRefreshInterval);
+
+            // Update the context value
+            setRefreshInterval(interval); // Convert ms to seconds for storage
+            setTempRefreshInterval(interval); // Ensure display is normalized
+            
+            // Show success message
+            setIsIntervalSaved(true);
+            setTimeout(() => setIsIntervalSaved(false), 2000);
+        } catch (error) {
+            console.error('Invalid refresh interval:', error);
+            setIsIntervalSaved(false);
+        }
     };
 
     return (
         <div className="container">
-            <Header title='Settings' showDarkModeToggle={false} showHomeButton={true}/>
+            <Header title='Settings' showDarkModeToggle={false} showHomeButton={true} />
 
             <div className='general-cards-container'>
                 <Card title="Appearance">
@@ -61,23 +112,30 @@ export default function Settings() {
                     </div>
                 </Card>
 
-                <Card title=' Data Refresh'>
+                <Card title='Live Data Refresh'>
                     <div className="card-content">
                         <div className="form-group">
                             <label htmlFor="refreshInterval" className="form-label">Auto-refresh interval (seconds)</label>
                             <input
                                 id="refreshInterval"
                                 type="number"
-                                min="5"
-                                max="300"
-                                value={refreshInterval}
+                                min="1"
+                                max="60"
+                                value={String(tempRefreshInterval)}
                                 onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
-                                className="form-input"
+                                className="form-input settings-form-input"
                             />
                             <p className="form-help">
-                                Set to 0 to disable auto-refresh
+                                Set a value between 1 and 60 seconds for auto-refreshing data.
                             </p>
                         </div>
+                        <button
+                            type="button"
+                            onClick={handleIntervalSave}
+                            className="button primary mt-2"
+                        >
+                            {isIntervalSaved ? 'Saved!' : 'Save Interval'}
+                        </button>
                     </div>
                 </Card>
 
@@ -91,26 +149,37 @@ export default function Settings() {
                             <input
                                 id="backendUrl"
                                 type="text"
-                                value={backendUrl}
-                                onChange={(e) => setBackendUrl(e.target.value)}
-                                className="form-input"
+                                value={tempBackendUrl}
+                                onChange={(e) => setTempBackendUrl(e.target.value)}
+                                className="form-input settings-form-input"
                                 placeholder="http://localhost:8000"
                             />
-                            <p className="form-help">
-                                This setting requires restarting the application
-                            </p>
+                            {connectionStatus === 'error' && (
+                                <div className="status-indicator error">
+                                    <span className="indicator-icon">⚠️</span>
+                                    <span>Could not connect to server. Please check the URL and try again.</span>
+                                </div>
+                            )}
+
+                            {connectionStatus === 'success' && (
+                                <div className="status-indicator success">
+                                    <span className="indicator-icon">✅</span>
+                                    <span>Connection successful!</span>
+                                </div>
+                            )}
                         </div>
                         <button
                             type='button'
                             onClick={handleSave}
                             className="button primary"
+                            disabled={connectionStatus === 'loading'}
                         >
-                            {isSaved ? 'Saved!' : 'Save Connection Settings'}
+                            {connectionStatus === 'loading' ? 'Testing connection...' : (isSaved ? 'Saved!' : 'Save Connection Settings')}
                         </button>
                     </div>
                 </Card>
             </div>
-            
+
             <Footer />
         </div>
     );

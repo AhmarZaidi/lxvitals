@@ -672,3 +672,88 @@ button:focus, a:focus, input:focus {
         margin-left: 0.5rem;
     }
 }
+
+// Popup styles
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-container {
+  background-color: $light-card-bg;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  
+  body.dark & {
+    background-color: $dark-card-bg;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  h2 {
+    margin: 0;
+  }
+}
+
+.popup-body {
+  margin-bottom: 1.5rem;
+}
+
+.popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  
+  button {
+    margin-left: 0.75rem;
+  }
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  
+  &.success {
+    color: $success-color;
+  }
+  
+  &.error {
+    color: $danger-color;
+  }
+  
+  &.loading {
+    color: $primary-color;
+  }
+  
+  .indicator-icon {
+    margin-right: 0.375rem;
+  }
+}
+
+.popup-input {
+    width: 95%;
+}
+
+.settings-form-input {
+    width: 97.7%;
+}

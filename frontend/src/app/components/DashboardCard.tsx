@@ -8,7 +8,9 @@ interface DashboardCardProps {
     onToggleCollapse: () => void;
     dragId: string;
     onDragReorder: (newOrder: string[]) => void;
-    onRefresh?: () => void; 
+    onRefresh?: () => void;
+    showAdvanced?: boolean;
+    onToggleAdvanced?: () => void;
     fullWidth?: boolean;
 }
 
@@ -20,6 +22,8 @@ export default function DashboardCard({
     dragId,
     onDragReorder,
     onRefresh,
+    showAdvanced,
+    onToggleAdvanced,
     fullWidth = false
 }: DashboardCardProps) {
     const [isDragging, setIsDragging] = useState(false);
@@ -66,6 +70,16 @@ export default function DashboardCard({
             <div className="card-header">
                 <h2>{title}</h2>
                 <div className="header-buttons-container">
+                    {onToggleAdvanced && (
+                        <button
+                            type="button"
+                            onClick={onToggleAdvanced}
+                            className={`advanced-toggle ${showAdvanced ? 'active' : ''}`}
+                            title={showAdvanced ? "Hide advanced options" : "Show advanced options"}
+                        >
+                            {showAdvanced ? "🔒" : "🔓"}
+                        </button>
+                    )}
                     {onRefresh && (
                         <button
                             type="button"

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
 	CPU as CPUType,
 	GPU,
@@ -11,6 +11,7 @@ import {
 	Battery
 } from '@/app/types';
 import { formatTimeLeft } from '@/app/utils';
+import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 
 type DataCategory = 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'speed' | 'battery';
 
@@ -40,9 +41,15 @@ interface AppContextType {
 	collapsedSections: Record<string, boolean>;
 	toggleCollapse: (section: string) => void;
 	refreshAllData: () => Promise<void>;
+    backendUrl: string;
+    setBackendUrl: (url: string) => void;
+    refreshInterval: number;
+    setRefreshInterval: (interval: number) => void;
+    advancedOptions: Record<string, boolean>;
+    toggleAdvanced: (section: string) => void;
 }
 
-const defaultCardOrder = ['cpu', 'gpu', 'memory', 'speed', 'battery', 'wifi', 'drives'];
+const defaultCardOrder = ['cpu', 'gpu', 'memory', 'wifi', 'drives', 'battery', 'speed'];
 
 const AppContext = createContext<AppContextType>({
 	dataState: {
@@ -60,7 +67,13 @@ const AppContext = createContext<AppContextType>({
 	setCardOrder: () => { },
 	collapsedSections: {},
 	toggleCollapse: () => { },
-	refreshAllData: async () => { }
+	refreshAllData: async () => { },
+    backendUrl: '',
+    setBackendUrl: () => { },
+    refreshInterval: 5,
+    setRefreshInterval: () => { },
+    advancedOptions: {},
+    toggleAdvanced: () => { }
 });
 
 function emptyEntry<T>(): DataEntry<T> {
@@ -87,6 +100,25 @@ export function AppProvider({ children }: AppProviderProps) {
 		cpu: false, gpu: false, memory: false, drives: false, wifi: false, speed: false, battery: false
 	});
 
+    // Refresh interval with default of 5 seconds
+    const [refreshInterval, setRefreshInterval] = useState<number>(5);
+
+    const [advancedOptions, setAdvancedOptions] = useLocalStorage<Record<string, boolean>>(
+        'advancedOptions',
+        { cpu: false, gpu: false, memory: false, drives: false, wifi: false, speed: false, battery: false }
+    );
+
+    const savedBackendUrl = window.localStorage.getItem('backendUrl') || '';
+    const [backendUrl, setBackendUrlState] = useLocalStorage<string>('backendUrl', savedBackendUrl);
+
+    // Use this function to update backendUrl
+    const setBackendUrl = (url: string) => {
+        // Update in localStorage
+        setBackendUrlState(url);
+        // Clear all cached data when changing backend
+        clearCache();
+    };
+
 	const [dataState, setDataState] = useState<DataState>({
 		cpu: emptyEntry(),
 		gpu: emptyEntry(),
@@ -98,6 +130,12 @@ export function AppProvider({ children }: AppProviderProps) {
 	});
 
 	const fetchData = async (category: DataCategory) => {
+        // Skip fetch if no backend URL is set
+        if (!backendUrl) {
+            console.warn('No backend URL set.');
+            return;
+        }
+
 		setDataState(prev => ({
 			...prev,
 			[category]: {
@@ -108,8 +146,13 @@ export function AppProvider({ children }: AppProviderProps) {
 		}));
 
 		try {
-			const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${apiEndpoints[category]}`;
-			const response = await fetch(url);
+			const url = `${backendUrl}${apiEndpoints[category]}`;
+			const response = await fetch(url, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
 
 			if (!response.ok) {
 				throw new Error(`Error fetching ${category} data: ${response.status}`);
@@ -181,6 +224,13 @@ export function AppProvider({ children }: AppProviderProps) {
 		}));
 	};
 
+    const toggleAdvanced = (section: string) => {
+        setAdvancedOptions(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+    };
+
 	return (
 		<AppContext.Provider
 			value={{
@@ -191,7 +241,13 @@ export function AppProvider({ children }: AppProviderProps) {
 				setCardOrder,
 				collapsedSections,
 				toggleCollapse,
-				refreshAllData
+				refreshAllData,
+                backendUrl,
+                setBackendUrl,
+                refreshInterval,
+                setRefreshInterval,
+                advancedOptions,
+                toggleAdvanced,
 			}}
 		>
 			{children}

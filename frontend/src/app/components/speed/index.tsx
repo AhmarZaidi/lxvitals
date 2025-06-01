@@ -12,6 +12,7 @@ export default function Speed() {
         setCardOrder,
         collapsedSections,
         toggleCollapse,
+        backendUrl
     } = useAppContext();
 
     const { data, loading, error } = dataState.speed;
@@ -32,7 +33,7 @@ export default function Speed() {
 
     const handlePing = async () => {
         setPingLoading(true);
-        const result = await checkLatency();
+        const result = await checkLatency(backendUrl);
         setLatency(result);
         setPingLoading(false);
     };
@@ -46,7 +47,7 @@ export default function Speed() {
             ) : (
                 <DashboardCard
                     key="speed"
-                    title="Speed"
+                    title="Network Speed"
                     isCollapsed={collapsedSections.speed}
                     onToggleCollapse={() => toggleCollapse('speed')}
                     dragId="speed"

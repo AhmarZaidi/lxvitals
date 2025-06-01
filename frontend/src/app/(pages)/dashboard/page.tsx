@@ -19,9 +19,9 @@ export default function Dashboard() {
         cpu: <CPU key="cpu" />,
         gpu: <GPU key="gpu" />,
         memory: <Memory key="memory" />,
+        wifi: <Wifi key="wifi" />,
         drives: <Drives key="drives" />,
         battery: <Battery key="battery" />,
-        wifi: <Wifi key="wifi" />,
         speed: <Speed key="speed" />
     };
 

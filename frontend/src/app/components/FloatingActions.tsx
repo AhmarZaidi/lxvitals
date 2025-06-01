@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAppContext } from '@/app/context/AppContext';
+import { secondsToMs } from '@/app/utils'; 
 
 export default function FloatingActions() {
-	const { refreshAllData } = useAppContext();
+	const { refreshAllData, refreshInterval } = useAppContext();
 	const [liveMode, setLiveMode] = useState(false);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -16,10 +17,11 @@ export default function FloatingActions() {
 		}
 
 		// If live mode is enabled, set up the interval
-		if (liveMode) {
+		if (liveMode && refreshInterval > 0) {
+            const intervalMs = secondsToMs(refreshInterval);
 			intervalRef.current = setInterval(() => {
 				refreshAllData();
-			}, 2000); // 2 seconds
+			}, intervalMs);
 		}
 
 		// Cleanup on unmount
@@ -28,7 +30,7 @@ export default function FloatingActions() {
 				clearInterval(intervalRef.current);
 			}
 		};
-	}, [liveMode, refreshAllData]);
+	}, [liveMode, refreshInterval, refreshAllData]);
 
 	const toggleLiveMode = () => {
 		setLiveMode(prev => !prev);
@@ -48,6 +50,7 @@ export default function FloatingActions() {
 				className={`button ${liveMode ? 'danger' : 'secondary'}`}
 				onClick={toggleLiveMode}
 				title={liveMode ? 'Stop live updates' : 'Start live updates'}
+                disabled={refreshInterval <= 0}
 			>
 				{liveMode ? '⏹️' : '▶️'}
 			</button>

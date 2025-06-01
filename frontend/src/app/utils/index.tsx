@@ -33,10 +33,10 @@ export const getTemperatureUnit = (unit: string | null) => {
     }
 }
 
-export async function checkLatency(): Promise<number | null> {
+export async function checkLatency(url: string): Promise<number | null> {
     try {
         const start = performance.now();
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ping`, {
+        const response = await fetch(`${url}/ping`, {
             cache: 'no-store',
         });
         if (!response.ok) throw new Error('Failed to ping server');
@@ -76,4 +76,37 @@ export function formatTimeLeft(value: number, unit: string): { value: number; un
             unit: 'minutes',
         };
     }
+}
+
+export async function pingBackend(url: string): Promise<boolean | null> {
+    try {
+        const response = await fetch(`${url}/ping`, {
+            cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Failed to ping server at url ' + url);
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
+export function normalizeUrl(url: string): string {
+    if (!url) return '';
+    let normalized = url.trim();
+    if (!/^https?:\/\//i.test(normalized)) {
+        normalized = `http://${normalized}`;
+    }
+    return normalized;
+}
+
+export function checkInterval(seconds: number): number {
+    if (seconds < 1 || seconds > 60) {
+        throw new Error('Seconds must be between 1 and 60');
+    }
+    return seconds;
+}
+
+export function secondsToMs(seconds: number): number {
+    return checkInterval(seconds) * 1000;
 }

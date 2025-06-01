@@ -5,7 +5,7 @@ import ThemeProvider from '@/app/providers/ThemeProvider';
 import { AppProvider } from '@/app/context/AppContext';
 
 export const metadata: Metadata = {
-    title: 'Samba Vitals - Server Dashboard',
+    title: 'Linux Vitals - Server Dashboard',
     description: 'Monitor your server vitals on the network',
 };
 
