@@ -21,8 +21,8 @@ class NetworkMonitor:
             download = st.download()
             upload = st.upload()
 
-            upload_speed = convert_speed(upload) if upload else None
             download_speed = convert_speed(download) if download else None
+            upload_speed = convert_speed(upload) if upload else None
 
             end_time = time.time()
             test_time = round(end_time - start_time, 2)
