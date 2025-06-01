@@ -137,9 +137,12 @@ class SystemMonitor:
             # Add boot drive info if not already included    
             boot_path = '/'
             if boot_path not in seen_paths:
-                total, used, free = shutil.disk_usage(boot_path)
+                # The free valuse from this doesn't work because it shows space resreved 
+                # for root user as not free
+                total, used, _ = shutil.disk_usage(boot_path)
 
                 percent = round(used / total * 100, 2) if total and used and total > 0 else None
+                free = (total-used) if total and used else None
                 
                 total_unit = calculate_size_unit(total) if total else None
                 used_unit = calculate_size_unit(used) if used else None
