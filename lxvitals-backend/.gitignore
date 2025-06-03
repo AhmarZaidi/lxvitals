@@ -33,3 +33,4 @@ coverage.xml
 *.swp
 *.swo
 .DS_Store
+._.DS_Store

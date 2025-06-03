@@ -1,9 +1,10 @@
 import psutil
 import os
+import time
 import shutil
 import sensors
 from app.core.config import settings
-from app.utils.utils import convert_size, calculate_size_unit
+from app.utils.utils import convert_size, calculate_size_unit, format_uptime
 
 class SystemMonitor:
     def __init__(self):
@@ -26,7 +27,7 @@ class SystemMonitor:
                     elif "cpu_fan" in name and "asus" in label.lower():
                         fan_speed = int(feature.get_value())
 
-            cpu_usage = round(psutil.cpu_percent(interval=1), 2)
+            cpu_usage = round(psutil.cpu_percent(interval=0.2), 2)
             cores = psutil.cpu_count(logical=True)
             frequency = psutil.cpu_freq().current
 
@@ -170,18 +171,32 @@ class SystemMonitor:
         except Exception as e:
             return {'error': str(e)}
 
+    def get_uptime(self):
+        try:
+            uptime_seconds = int(time.time() - psutil.boot_time())
+            uptime_formatted = format_uptime(uptime_seconds)
+
+            return {
+                'uptime_seconds': uptime_seconds,
+                'uptime_formatted': uptime_formatted
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
     def get_status(self):
         try:
             cpu = self.get_cpu_stats()
             gpu = self.get_gpu_stats()
             memory = self.get_memory_usage()
             drives = self.get_drive_info()
+            uptime = self.get_uptime()
 
             return {
                 'cpu': cpu,
                 'gpu': gpu,
                 'memory': memory,
-                'drives': drives
+                'drives': drives,
+                'uptime': uptime
             }
         except Exception as e:
             return {'error': str(e)}

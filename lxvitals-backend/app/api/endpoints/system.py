@@ -31,3 +31,8 @@ async def get_gpu_stats():
 async def get_drive_stats():
     """Get drive statistics"""
     return system_monitor.get_drive_info()
+
+@router.get("/uptime")
+async def get_uptime():
+    """Get system uptime"""
+    return system_monitor.get_uptime()

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
+    Health,
 	CPU as CPUType,
 	GPU,
 	Memory,
@@ -13,9 +14,10 @@ import {
 import { formatTimeLeft, normalizeUrl, isValidUrl } from '@/app/utils';
 import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 
-type DataCategory = 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'battery' | 'speed';
+type DataCategory = 'health' | 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'battery' | 'speed';
 
 interface DataState {
+	health: DataEntry<Health>;
 	cpu: DataEntry<CPUType>;
 	gpu: DataEntry<GPU>;
 	memory: DataEntry<Memory>;
@@ -53,6 +55,7 @@ const defaultCardOrder = ['cpu', 'gpu', 'memory', 'wifi', 'drives', 'battery', '
 
 const AppContext = createContext<AppContextType>({
 	dataState: {
+		health: emptyEntry(),
 		cpu: emptyEntry(),
 		gpu: emptyEntry(),
 		memory: emptyEntry(),
@@ -85,6 +88,7 @@ interface AppProviderProps {
 }
 
 const apiEndpoints: Record<DataCategory, string> = {
+	health: '/health',
 	cpu: '/api/system/cpu',
 	gpu: '/api/system/gpu',
 	memory: '/api/system/memory',
@@ -119,6 +123,7 @@ export function AppProvider({ children }: AppProviderProps) {
     };
 
 	const [dataState, setDataState] = useState<DataState>({
+		health: emptyEntry(),
 		cpu: emptyEntry(),
 		gpu: emptyEntry(),
 		memory: emptyEntry(),
@@ -189,7 +194,7 @@ export function AppProvider({ children }: AppProviderProps) {
 	};
 
 	const refreshAllData = async () => {
-        const categories: DataCategory[] = ['cpu', 'gpu', 'memory', 'drives', 'wifi', 'battery'];
+        const categories: DataCategory[] = ['health', 'cpu', 'gpu', 'memory', 'drives', 'wifi', 'battery'];
         // Create an array of promises for each fetch operation
         const fetchPromises = categories.map(category => fetchData(category));
         
@@ -205,6 +210,7 @@ export function AppProvider({ children }: AppProviderProps) {
 			}));
 		} else {
 			setDataState({
+				health: emptyEntry(),
 				cpu: emptyEntry(),
 				gpu: emptyEntry(),
 				memory: emptyEntry(),

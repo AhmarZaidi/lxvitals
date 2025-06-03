@@ -89,3 +89,21 @@ export interface Network {
 	speed: Speed | null;
 	wifi: Wifi | null;
 }
+
+export interface Health {
+    status: 'healthy' | 'unhealthy';
+    issues: string[];
+    cpu_usage: number;
+    memory_usage: number;
+    uptime_seconds: number;
+    uptime_formatted: string;
+    import_status: {
+        [module: string]: {
+            status: 'ok' | 'error';
+            error?: string;
+            import_time_ms?: number;
+            details?: string;
+        };
+    };
+    health_check_duration_ms: number;
+}

@@ -1,4 +1,5 @@
 import psutil
+
 class BatteryMonitor:
     def __init__(self):
         self.last_stats = None

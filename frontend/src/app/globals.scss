@@ -80,10 +80,6 @@ a {
   color: $primary-color;
   text-decoration: none;
   
-  &:hover {
-    text-decoration: underline;
-  }
-  
   body.dark & {
     color: lighten($primary-color, 15%);
   }
@@ -118,6 +114,24 @@ button, .button {
     
     &:hover:not(:disabled) {
       background-color: $secondary-hover;
+    }
+  }
+
+  &.success {
+    background-color: $success-color;
+    color: white;
+  
+    &:hover:not(:disabled) {
+      background-color: $success-hover;
+    }
+  }
+
+  &.warning {
+    background-color: $warning-color;
+    color: white;
+  
+    &:hover:not(:disabled) {
+      background-color: $warning-hover;
     }
   }
   
@@ -357,7 +371,7 @@ button, .button {
     display: inline-flex;
     align-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 26px;
+    font-size: 22px;
   }
 }
 
@@ -768,4 +782,36 @@ button:focus, a:focus, input:focus {
 
 .loading-spinner {
     height: 16rem;
+}
+
+// Health popup
+.health-popup {
+  width: 85%;
+  max-width: 400px;  // Reduced from 500px
+  
+  // Make it more compact on mobile
+  @media (max-width: 480px) {
+    width: 92%;
+    max-width: 350px;
+    padding: 1rem;
+    
+    h2 {
+      font-size: 1.2rem;
+    }
+    
+    .popup-body {
+      font-size: 0.9rem;
+    }
+  }
+  
+  // Improve display of long module names
+  .module-name {
+    max-width: 50%; // Prevent long module names from breaking layout
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .feature-list {
+    font-size: 0.9rem;
+  }
 }
