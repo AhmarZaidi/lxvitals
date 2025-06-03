@@ -1,5 +1,4 @@
 import re
-from ping3 import ping
 
 def get_connected_ap_index(output: str):
         pattern = r"AP\[(\d+)\]\.IN-USE:\s*\*"

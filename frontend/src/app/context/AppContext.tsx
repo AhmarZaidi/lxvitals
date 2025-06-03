@@ -7,13 +7,13 @@ import {
 	Memory,
 	Drives,
 	Wifi,
-	Speed,
-	Battery
+	Battery,
+	Speed
 } from '@/app/types';
 import { formatTimeLeft, normalizeUrl, isValidUrl } from '@/app/utils';
 import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 
-type DataCategory = 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'speed' | 'battery';
+type DataCategory = 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'battery' | 'speed';
 
 interface DataState {
 	cpu: DataEntry<CPUType>;
@@ -21,8 +21,8 @@ interface DataState {
 	memory: DataEntry<Memory>;
 	drives: DataEntry<Drives>;
 	wifi: DataEntry<Wifi>;
-	speed: DataEntry<Speed>;
 	battery: DataEntry<Battery>;
+	speed: DataEntry<Speed>;
 }
 
 interface DataEntry<T> {
@@ -58,8 +58,8 @@ const AppContext = createContext<AppContextType>({
 		memory: emptyEntry(),
 		drives: emptyEntry(),
 		wifi: emptyEntry(),
-		speed: emptyEntry(),
-		battery: emptyEntry()
+		battery: emptyEntry(),
+		speed: emptyEntry()
 	},
 	fetchData: async () => { },
 	clearCache: () => { },
@@ -90,14 +90,14 @@ const apiEndpoints: Record<DataCategory, string> = {
 	memory: '/api/system/memory',
 	drives: '/api/system/drives',
 	wifi: '/api/network/wifi',
-	speed: '/api/network/speed',
-	battery: '/api/battery'
+	battery: '/api/battery',
+	speed: '/api/network/speed'
 };
 
 export function AppProvider({ children }: AppProviderProps) {
 	const [cardOrder, setCardOrder] = useState<string[]>(defaultCardOrder);
 	const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
-		cpu: false, gpu: false, memory: false, drives: false, wifi: false, speed: false, battery: false
+		cpu: false, gpu: false, memory: false, drives: false, wifi: false, battery: false, speed: false
 	});
 
     // Refresh interval with default of 5 seconds
@@ -105,7 +105,7 @@ export function AppProvider({ children }: AppProviderProps) {
 
     const [advancedOptions, setAdvancedOptions] = useLocalStorage<Record<string, boolean>>(
         'advancedOptions',
-        { cpu: false, gpu: false, memory: false, drives: false, wifi: false, speed: false, battery: false }
+        { cpu: false, gpu: false, memory: false, drives: false, wifi: false, battery: false, speed: false }
     );
 
     const [backendUrl, setBackendUrlState] = useLocalStorage<string>('backendUrl', '');
@@ -124,8 +124,8 @@ export function AppProvider({ children }: AppProviderProps) {
 		memory: emptyEntry(),
 		drives: emptyEntry(),
 		wifi: emptyEntry(),
-		speed: emptyEntry(),
-		battery: emptyEntry()
+		battery: emptyEntry(),
+		speed: emptyEntry()
 	});
 
 	const fetchData = async (category: DataCategory) => {
@@ -210,8 +210,8 @@ export function AppProvider({ children }: AppProviderProps) {
 				memory: emptyEntry(),
 				drives: emptyEntry(),
 				wifi: emptyEntry(),
-				speed: emptyEntry(),
-				battery: emptyEntry()
+				battery: emptyEntry(),
+				speed: emptyEntry()
 			});
 		}
 	};

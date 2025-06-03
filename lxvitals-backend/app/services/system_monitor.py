@@ -2,7 +2,6 @@ import psutil
 import os
 import shutil
 import sensors
-import platform
 from app.core.config import settings
 from app.utils.utils import convert_size, calculate_size_unit
 

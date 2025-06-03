@@ -1,8 +1,5 @@
-import psutil
 import time
 import subprocess
-import platform
-import re
 import speedtest
 
 from app.utils.utils import get_connected_ap_index, get_current_ap_index, convert_speed

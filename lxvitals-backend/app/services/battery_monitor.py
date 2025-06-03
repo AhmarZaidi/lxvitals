@@ -1,10 +1,4 @@
 import psutil
-import time
-import subprocess
-import platform
-import re
-import speedtest
-
 class BatteryMonitor:
     def __init__(self):
         self.last_stats = None
