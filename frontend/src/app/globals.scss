@@ -757,3 +757,15 @@ button:focus, a:focus, input:focus {
 .settings-form-input {
     width: 97.7%;
 }
+
+.dragging {
+  opacity: 0.5;
+}
+
+.hidden {
+  display: none;
+}
+
+.loading-spinner {
+    height: 16rem;
+}

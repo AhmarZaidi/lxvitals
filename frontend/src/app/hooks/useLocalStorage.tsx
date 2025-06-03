@@ -6,11 +6,15 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
     // State to store our value
     const [storedValue, setStoredValue] = useState<T>(initialValue);
 
+    // Flag to track if we're in the browser environment
+    const isBrowser = typeof window !== 'undefined';
+
     // Use a ref to track if this is the initial mount
     const isInitialMount = useRef(true);
 
     // Initialize on component mount
     useEffect(() => {
+        if (!isBrowser) return;
         if (isInitialMount.current) {
             try {
                 // Get from local storage by key
@@ -26,7 +30,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
                 setStoredValue(initialValue);
             }
         }
-    }, [key]);
+    }, [key, isBrowser, initialValue]);
 
     // Return a wrapped version of useState's setter function that
     // persists the new value to localStorage
@@ -39,8 +43,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
             // Save state
             setStoredValue(valueToStore);
 
-            // Save to local storage
-            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+            // Save to local storage (only if in browser)
+            if (isBrowser) {
+                // Save to local storage
+                window.localStorage.setItem(key, JSON.stringify(valueToStore));
+            }
         } catch (error) {
             console.log('Error writing to localStorage:', error);
         }

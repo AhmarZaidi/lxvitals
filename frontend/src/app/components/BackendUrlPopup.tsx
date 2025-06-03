@@ -1,21 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { pingBackend, normalizeUrl } from '@/app/utils';
-import { useAppContext } from '@/app/context/AppContext';
-
+import { pingBackend, isValidUrl } from '@/app/utils';
 interface BackendUrlPopupProps {
 	onClose: () => void;
 	onSave: (url: string) => void;
 }
 
 export default function BackendUrlPopup({ onClose, onSave }: BackendUrlPopupProps) {
-	const [backendUrl, setBackendUrl] = useState('http://localhost:8000');
+    // TODO: Remove the direct local URL as being default
+	const [tempBackendUrl, setTempBackendUrl] = useState('http://192.168.1.x:5000');
 	const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-	const { clearCache } = useAppContext();
 
 	const handleSave = async () => {
-		if (!backendUrl.trim()) {
+		if (!tempBackendUrl || !isValidUrl(tempBackendUrl)) {
 			setStatus('error');
 			return;
 		}
@@ -23,32 +21,16 @@ export default function BackendUrlPopup({ onClose, onSave }: BackendUrlPopupProp
 		setStatus('loading');
 
 		try {
-			// Add missing protocol if needed
-            const finalUrl = normalizeUrl(backendUrl);
+			const isAlive = await pingBackend(tempBackendUrl);
 
-			const isAlive = await pingBackend(finalUrl);
-
-			if (!isAlive) {
+			if (isAlive) {
+                setTempBackendUrl(tempBackendUrl);
+                setStatus('success');
+                onSave(tempBackendUrl);
+                setTimeout(() => onClose(), 1000);
+            } else {
 				setStatus('error');
-				return;
-			}
-
-			setBackendUrl(finalUrl);
-
-			// Save to localStorage and apply
-			setStatus('success');
-			// localStorage.setItem('backendUrl', finalUrl);
-
-			// Clear cache to ensure fresh data with new backend
-			clearCache();
-
-			// Notify parent component
-			onSave(finalUrl);
-
-			// Close popup after a brief success message
-			setTimeout(() => {
-				onClose();
-			}, 1000);
+            }
 		} catch (error) {
 			console.error('Connection test failed:', error);
 			setStatus('error');
@@ -77,14 +59,14 @@ export default function BackendUrlPopup({ onClose, onSave }: BackendUrlPopupProp
 					<p>Please enter the backend server URL to connect to your system monitoring service:</p>
 
 					<div className="form-group">
-						<label htmlFor="backendUrl" className="form-label">Backend URL</label>
+						<label htmlFor="tempBackendUrl" className="form-label">Backend URL</label>
 						<input
-							id="backendUrl"
+							id="tempBackendUrl"
 							type="text"
-							value={backendUrl}
-							onChange={(e) => setBackendUrl(e.target.value)}
+							value={tempBackendUrl}
+							onChange={(e) => setTempBackendUrl((e.target.value).trim())}
 							className="form-input popup-input"
-							placeholder="http://localhost:8000"
+							placeholder="http://192.168.1.x:5000"
 							autoFocus
 						/>
 

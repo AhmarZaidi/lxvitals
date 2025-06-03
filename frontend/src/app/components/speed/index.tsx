@@ -12,13 +12,31 @@ export default function Speed() {
         setCardOrder,
         collapsedSections,
         toggleCollapse,
-        backendUrl
+        backendUrl,
+        setBackendUrl,
     } = useAppContext();
 
     const { data, loading, error } = dataState.speed;
 
     const [latency, setLatency] = useState<number | null>(null);
     const [pingLoading, setPingLoading] = useState(false);
+
+    const isBrowser = typeof window !== 'undefined';
+
+    useEffect(() => {
+        if(!isBrowser) return;
+
+        const savedUrl = window.localStorage.getItem('backendUrl');
+        if (!backendUrl) {
+            // If backend URL is not set, check localStorage
+            if (savedUrl) {
+                setBackendUrl(savedUrl);
+            }
+        } else if (backendUrl && !savedUrl) {
+            // If backend URL is already set, update localStorage
+            window.localStorage.setItem('backendUrl', backendUrl);
+        }
+    }, [backendUrl, setBackendUrl, isBrowser]);
 
     useEffect(() => {
         // Only fetch if we don't have data yet or if it's never been loaded

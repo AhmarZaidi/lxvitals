@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react'; 
 import { useAppContext } from '@/app/context/AppContext';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
@@ -15,7 +16,7 @@ import FloatingActions from '@/app/components/FloatingActions';
 export default function Dashboard() {
     const { cardOrder } = useAppContext();
 
-    const componentMap: Record<string, JSX.Element> = {
+    const componentMap: Record<string, React.ReactElement> = {
         cpu: <CPU key="cpu" />,
         gpu: <GPU key="gpu" />,
         memory: <Memory key="memory" />,

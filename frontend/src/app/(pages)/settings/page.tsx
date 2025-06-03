@@ -6,7 +6,7 @@ import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import Card from '@/app/components/Card';
-import { pingBackend, normalizeUrl, checkInterval } from '@/app/utils';
+import { pingBackend, isValidUrl, checkInterval } from '@/app/utils';
 
 export default function Settings() {
     const { 
@@ -23,6 +23,8 @@ export default function Settings() {
     const [isIntervalSaved, setIsIntervalSaved] = useState(false);
     const [connectionStatus, setConnectionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+    const isBrowser = typeof window !== 'undefined';
+
     useEffect(() => {
         if (darkMode) {
             document.body.classList.add('dark');
@@ -32,30 +34,40 @@ export default function Settings() {
     }, [darkMode]);
 
     useEffect(() => {
+        if(!isBrowser) return;
+
+        const savedUrl = window.localStorage.getItem('backendUrl');
+        if (!backendUrl || !isValidUrl(backendUrl)) {
+            // If backend URL is not set, check localStorage
+            if (savedUrl && isValidUrl(savedUrl)) {
+                setBackendUrl(savedUrl);
+            }
+        } else if (!savedUrl || !isValidUrl(savedUrl)) {
+            // If backend URL is already set, update localStorage
+            window.localStorage.setItem('backendUrl', backendUrl);
+        }
+
         // Initialize the temp URL from the context
         setTempBackendUrl(backendUrl || '');
         setTempRefreshInterval(refreshInterval);
-    }, [backendUrl, refreshInterval]);
+    }, [backendUrl, refreshInterval, setBackendUrl, isBrowser]);
 
     const handleSave = async () => {
-        if (!tempBackendUrl.trim()) {
+        if (!tempBackendUrl || !isValidUrl(tempBackendUrl)) {
             setConnectionStatus('error');
             return;
         }
 
         setConnectionStatus('loading');
 
-        // Normalize URL - add protocol if missing
-        const finalUrl = normalizeUrl(tempBackendUrl);
-        setTempBackendUrl(finalUrl);
-
         // Test the connection first
         try {
             const isAlive = await pingBackend(tempBackendUrl);
             if (isAlive) {
                 // Update the URL if connection is successful
-                setBackendUrl(finalUrl);
+                setTempBackendUrl(tempBackendUrl);
                 setConnectionStatus('success');
+                setBackendUrl(tempBackendUrl);
                 setIsSaved(true);
                 setTimeout(() => setIsSaved(false), 2000);
             } else {
@@ -150,9 +162,9 @@ export default function Settings() {
                                 id="backendUrl"
                                 type="text"
                                 value={tempBackendUrl}
-                                onChange={(e) => setTempBackendUrl(e.target.value)}
+                                onChange={(e) => setTempBackendUrl((e.target.value).trim())}
                                 className="form-input settings-form-input"
-                                placeholder="http://localhost:8000"
+                                placeholder="http://192.168.1.x:5000"
                             />
                             {connectionStatus === 'error' && (
                                 <div className="status-indicator error">

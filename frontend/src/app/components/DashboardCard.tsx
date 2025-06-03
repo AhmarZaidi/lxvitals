@@ -1,5 +1,4 @@
 import { ReactNode, useState } from 'react';
-import styles from '../styles/DashboardCard.module.scss';
 
 interface DashboardCardProps {
     title: string;

@@ -10,7 +10,7 @@ import {
 	Speed,
 	Battery
 } from '@/app/types';
-import { formatTimeLeft } from '@/app/utils';
+import { formatTimeLeft, normalizeUrl, isValidUrl } from '@/app/utils';
 import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 
 type DataCategory = 'cpu' | 'gpu' | 'memory' | 'drives' | 'wifi' | 'speed' | 'battery';
@@ -108,13 +108,12 @@ export function AppProvider({ children }: AppProviderProps) {
         { cpu: false, gpu: false, memory: false, drives: false, wifi: false, speed: false, battery: false }
     );
 
-    const savedBackendUrl = window.localStorage.getItem('backendUrl') || '';
-    const [backendUrl, setBackendUrlState] = useLocalStorage<string>('backendUrl', savedBackendUrl);
+    const [backendUrl, setBackendUrlState] = useLocalStorage<string>('backendUrl', '');
 
     // Use this function to update backendUrl
     const setBackendUrl = (url: string) => {
         // Update in localStorage
-        setBackendUrlState(url);
+        setBackendUrlState(normalizeUrl(url));
         // Clear all cached data when changing backend
         clearCache();
     };
@@ -131,8 +130,8 @@ export function AppProvider({ children }: AppProviderProps) {
 
 	const fetchData = async (category: DataCategory) => {
         // Skip fetch if no backend URL is set
-        if (!backendUrl) {
-            console.warn('No backend URL set.');
+        if (!backendUrl || !isValidUrl(backendUrl)) {
+            console.warn('Backend URL is not set or invalid. Skipping fetch for', category);
             return;
         }
 
@@ -146,7 +145,7 @@ export function AppProvider({ children }: AppProviderProps) {
 		}));
 
 		try {
-			const url = `${backendUrl}${apiEndpoints[category]}`;
+			const url = normalizeUrl(`${backendUrl}${apiEndpoints[category]}`);
 			const response = await fetch(url, {
                 cache: 'no-store',
                 headers: {

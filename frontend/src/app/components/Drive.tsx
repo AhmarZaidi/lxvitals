@@ -7,7 +7,7 @@ interface DriveProps {
 }
 
 export default function Drive({ drive }: DriveProps) {
-    const usageType = getUsageType(drive.percent);
+    const usageType = getUsageType(drive.percent, false);
 
     return (
         <div className="drive-item">

@@ -93,11 +93,51 @@ export async function pingBackend(url: string): Promise<boolean | null> {
 
 export function normalizeUrl(url: string): string {
     if (!url) return '';
-    let normalized = url.trim();
-    if (!/^https?:\/\//i.test(normalized)) {
-        normalized = `http://${normalized}`;
+    try {
+        // First, remove any quotes that might be in the string
+        let normalized = url.trim().replace(/^["']|["']$/g, '');
+
+        const urlObj = new URL(normalized);
+        normalized = urlObj.href;
+
+        // Fix the pathname to avoid double slashes (after the protocol)
+        const urlParts = normalized.split('://');
+        if (urlParts.length > 1) {
+            // Handle the path portion (after protocol)
+            const path = urlParts[1].replace(/\/\//g, '/');
+            normalized = `${urlParts[0]}://${path}`;
+        }
+
+        // Remove trailing slashes
+        normalized = normalized.replace(/\/+$/, '');
+        return normalized;
+    } catch (error) {
+        console.error('Error normalizing URL:', error);
+        // If URL is invalid, return it as is
+        return url.trim();
     }
-    return normalized;
+}
+
+export function isValidUrl(url: string | null): boolean {
+    try {
+        if (!url) return false;
+
+        if (url.includes('"') || url.includes("'")) {
+            return false; // Contains quotes
+        }
+
+        const urlParts = url.split('://');
+        if (urlParts.length > 1 && urlParts[1].includes('//')) {
+            return false; // Contains double slashes in path
+        }
+        
+        // Check for malformed URL structure
+        new URL(url);
+        return true;
+    } catch (error) {
+        console.error('Invalid URL:', url, error);
+        return false;
+    }
 }
 
 export function checkInterval(seconds: number): number {

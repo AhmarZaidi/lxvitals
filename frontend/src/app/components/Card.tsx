@@ -1,4 +1,4 @@
-import styles from '../styles/DashboardCard.module.scss';
+import React, { ReactNode } from 'react';
 
 interface CardProps {
     title: string;
