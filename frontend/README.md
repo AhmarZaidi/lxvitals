@@ -1,4 +1,4 @@
-****# Linux Vitals Frontend
+# Linux Vitals Frontend
 
 A system monitoring dashboard built with Next.js that displays hardware statistics for your Linux system.
 
